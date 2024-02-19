@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "llm-neo4j-importer"
+version = "0.1.0"
+description = ""
+authors = ["Jason Koo <jalakoo@gmail.com>"]
+readme = "README.md"
+packages = [{include = "llm_neo4j_importer"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+matplotlib = "^3.8.3"
+streamlit = "^1.31.1"
+networkx = "^3.2.1"
+graphviz = "^0.20.1"
+streamlit-agraph = "^0.0.45"
+pyvis = "^0.3.2"
+gpt4all = "^2.2.1.post1"
+streamlit-option-menu = "^0.3.12"
+retry2 = "^0.9.5"
+langchain = "^0.1.8"
+langchain-community = "^0.0.21"
+neo4j = "^5.17.0"
+langchainhub = "^0.1.14"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
