@@ -1,9 +1,9 @@
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.document_loaders.csv_loader import CSVLoader
 import tempfile
-from n4j_utils import add_chunk, chunk_exists, add_chunks, add_document_and_chunk_connections, add_tags_to_chunk, document_exists
+from .n4j_utils import add_chunk, chunk_exists, add_chunks, add_document_and_chunk_connections, add_tags_to_chunk, document_exists
 import os
-from tag_generator import get_tags
+from .tag_generator import get_tags
 import logging
 
 def upload(file: any) -> bool:

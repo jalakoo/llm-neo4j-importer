@@ -1,6 +1,6 @@
 from neo4j import GraphDatabase
-from langchain.vectorstores import Neo4jVector
-from langchain.graphs import Neo4jGraph
+from langchain_community.vectorstores import Neo4jVector
+from langchain_community.graphs import Neo4jGraph
 from neo4j.exceptions import ClientError
 from pydantic import BaseModel
 import logging

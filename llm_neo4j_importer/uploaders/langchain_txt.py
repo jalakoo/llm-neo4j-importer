@@ -1,14 +1,14 @@
 from langchain.docstore.document import Document
-from langchain.document_loaders import TextLoader
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.vectorstores import Neo4jVector
-from langchain.graphs import Neo4jGraph
+from langchain_community.document_loaders import TextLoader
+from langchain_community.graphs import Neo4jGraph
+from langchain_community.vectorstores import Neo4jVector
 import os
 import logging
 from neo4j.exceptions import ClientError
-from tag_generator import get_tags
-from n4j_utils import add_chunks, add_tags_to_chunk, add_document_and_chunk_connections,document_exists
+from .tag_generator import get_tags
+from .n4j_utils import add_chunks, add_tags_to_chunk, add_document_and_chunk_connections,document_exists
 
 def upload(
         file: any) -> bool:

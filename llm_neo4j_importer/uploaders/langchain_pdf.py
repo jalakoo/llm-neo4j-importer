@@ -1,12 +1,12 @@
-from langchain.vectorstores.neo4j_vector import Neo4jVector
+from langchain_community.vectorstores import Neo4jVector
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from pypdf import PdfReader
 import io
 import logging
 import os
-from n4j_utils import add_chunks, add_document_and_chunk_connections, add_tags_to_chunk, document_exists
-from tag_generator import get_tags
+from .n4j_utils import add_chunks, add_document_and_chunk_connections, add_tags_to_chunk, document_exists
+from .tag_generator import get_tags
 
 def upload(file: any) -> bool:
 

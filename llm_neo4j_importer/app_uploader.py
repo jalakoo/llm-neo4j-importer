@@ -1,8 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
-from streamlit_chat import message
 from upload import upload, type_supported
-from utilities import enable_logging
 import logging
 import os
 
@@ -21,9 +19,6 @@ def main():
     #     st.session_state["UPLOADED_FILES"] = []
     st.set_page_config(layout="wide")
     st.title('Neo4j Data Upload Demo')
-
-    # Setup Neo4j driver and standard logging
-    enable_logging()
 
     # FILE UPLOADS
     # Allow users to upload multiple files

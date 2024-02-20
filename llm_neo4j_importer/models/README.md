@@ -1,0 +1,1 @@
+Place GPT4All compatible models here

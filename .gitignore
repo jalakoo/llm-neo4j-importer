@@ -1,4 +1,4 @@
-llm_neo4j_importer/rag/models/*
+*.gguf
 .streamlit
 
 # Mac OS
