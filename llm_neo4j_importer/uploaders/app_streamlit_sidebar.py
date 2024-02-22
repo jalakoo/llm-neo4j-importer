@@ -16,7 +16,7 @@ def add_sidebar():
         # Optionally Load credentials from .env - if present
         load_dotenv(".env")
         if url is None: url = os.getenv("NEO4J_URI", "")
-        if username is None: username = os.getenv("NEO4J_USER", "")
+        if username is None: username = os.getenv("NEO4J_USERNAME", "")
         if password is None: password = os.getenv("NEO4J_PASSWORD", "")
         if openai is None: openai = os.getenv("NEO4J_PASSWORD", "")
 

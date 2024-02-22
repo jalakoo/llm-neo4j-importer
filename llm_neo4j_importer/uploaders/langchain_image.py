@@ -24,7 +24,7 @@ from .tag_generator import get_tags
 def upload(file: any):
 
     url = os.getenv("NEO4J_URI")
-    username = os.getenv("NEO4J_USER")
+    username = os.getenv("NEO4J_USERNAME")
     password = os.getenv("NEO4J_PASSWORD")
 
     if document_exists(

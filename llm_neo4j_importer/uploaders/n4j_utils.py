@@ -159,7 +159,7 @@ def add_document(
         if neo4j_url is None:
             neo4j_url = os.getenv("NEO4J_URI", None)
         if neo4j_username is None:
-            neo4j_username = os.getenv("NEO4J_USER", None)
+            neo4j_username = os.getenv("NEO4J_USERNAME", None)
         if neo4j_password is None:
             neo4j_password = os.getenv("NEO4J_PASSWORD", None)
 

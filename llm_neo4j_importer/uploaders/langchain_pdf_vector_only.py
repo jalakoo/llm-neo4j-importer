@@ -14,14 +14,7 @@ def upload(file: any) -> bool:
     username = os.getenv("NEO4J_USERNAME")
     password = os.getenv("NEO4J_PASSWORD")
 
-    if document_exists(
-        url,
-        username,
-        password,
-        file.name
-    ) is True:
-        logging.debug(f'file {file} already uploaded')
-        return False
+
 
     open_pdf_file = io.BytesIO(file.read()) 
     pdf_reader = PdfReader(open_pdf_file)
@@ -47,24 +40,5 @@ def upload(file: any) -> bool:
         node_label="Chunk",
         pre_delete_collection=False,  # Delete existing PDF data
     )
-
-    add_document_and_chunk_connections(
-        filename=file.name,
-        full_text = "",
-        chunks = chunks,
-        url=url,
-        username=username,
-        password = password
-    )
-
-    for c in chunks:
-        tags = get_tags(c)
-        add_tags_to_chunk(
-            c,
-            tags,
-            url,
-            username,
-            password
-        )
 
     return True

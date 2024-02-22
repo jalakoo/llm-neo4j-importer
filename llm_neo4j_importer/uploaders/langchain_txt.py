@@ -1,5 +1,5 @@
 from langchain.docstore.document import Document
-from langchain.embeddings.openai import OpenAIEmbeddings
+# from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.document_loaders import TextLoader
 from langchain_community.graphs import Neo4jGraph
@@ -7,7 +7,9 @@ from langchain_community.vectorstores import Neo4jVector
 import os
 import logging
 from neo4j.exceptions import ClientError
+from .llm_manager import EMBEDDINGS
 from .tag_generator import get_tags
+from .entity_relationships_extraction import get_entities
 from .n4j_utils import add_chunks, add_tags_to_chunk, add_document_and_chunk_connections,document_exists
 
 def upload(
@@ -24,7 +26,7 @@ def upload(
         Exceptions if data is not in the correct format or if the upload fails.
     """
     url = os.getenv("NEO4J_URI")
-    username = os.getenv("NEO4J_USER")
+    username = os.getenv("NEO4J_USERNAME")
     password = os.getenv("NEO4J_PASSWORD")
 
     try:
@@ -35,21 +37,22 @@ def upload(
         except Exception as e:
             logging.error(f'Could not read file {file}')
 
-    if document_exists(
-        url=url,
-        username=username,
-        password=password,
-        filename = file.name
-        ) is True:
-        return False
+    # Enable if wanting to prevent duplicates
+    # if document_exists(
+    #     url=url,
+    #     username=username,
+    #     password=password,
+    #     filename = file.name
+    #     ) is True:
+    #     return False
     
     text_splitter = CharacterTextSplitter(chunk_size=200, chunk_overlap=100)
     docs = [Document(page_content=x) for x in text_splitter.split_text(content.decode())]
-    embeddings = OpenAIEmbeddings()
+    # embeddings = OpenAIEmbeddings()
 
     add_chunks(
         docs,
-        embeddings,
+        EMBEDDINGS,
         url,
         username,
         password
@@ -65,14 +68,16 @@ def upload(
     )
 
     for doc in docs:
-        tags = get_tags(doc.page_content)
-        add_tags_to_chunk(
-            doc.page_content,
-            tags,
-            url,
-            username,
-            password
-        )
+        entities = get_entities(doc.page_content)
+        logging.debug(f'entities: {entities}')
+        # tags = get_tags(doc.page_content)
+        # add_tags_to_chunk(
+        #     doc.page_content,
+        #     tags,
+        #     url,
+        #     username,
+        #     password
+        # )
 
     return True
 

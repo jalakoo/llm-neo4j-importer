@@ -1,8 +1,10 @@
 import streamlit as st
 import streamlit.components.v1 as components
-from upload import upload, type_supported
+from upload_utils import upload, type_supported
 import logging
 import os
+
+logging.basicConfig(filename='llm_neo4j_importer.log', encoding='utf-8', level=logging.DEBUG)
 
 def on_input_change():
     user_input = st.session_state.user_input
@@ -19,6 +21,7 @@ def main():
     #     st.session_state["UPLOADED_FILES"] = []
     st.set_page_config(layout="wide")
     st.title('Neo4j Data Upload Demo')
+
 
     # FILE UPLOADS
     # Allow users to upload multiple files

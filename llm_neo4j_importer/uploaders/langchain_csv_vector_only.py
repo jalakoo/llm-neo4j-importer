@@ -1,10 +1,9 @@
 # from langchain.embeddings.openai import OpenAIEmbeddings
 from .llm_manager import EMBEDDINGS
+from langchain_community.vectorstores import Neo4jVector
 from langchain.document_loaders.csv_loader import CSVLoader
 import tempfile
-from .n4j_utils import add_chunk, chunk_exists, add_chunks, add_document_and_chunk_connections, add_tags_to_chunk, document_exists
 import os
-from .tag_generator import get_tags
 import logging
 
 def upload(file: any) -> bool:
@@ -12,15 +11,6 @@ def upload(file: any) -> bool:
     url = os.getenv("NEO4J_URI")
     username = os.getenv("NEO4J_USERNAME")
     password = os.getenv("NEO4J_PASSWORD")
-
-    if document_exists(
-        url=url,
-        username=username,
-        password =password,
-        filename=file.name
-    ) is True:
-        logging.info(f'File {file} already uploaded')
-        return False
 
     #use tempfile because CSVLoader only accepts a file_path
     with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
@@ -33,7 +23,7 @@ def upload(file: any) -> bool:
                 logging.error(f'Unable to read file {file}')
         tmp_file_path = tmp_file.name
 
-    # Official doc: https://python.langchain.com/docs/integrations/document_loaders/csv
+    # Official doc: https://api.python.langchain.com/en/latest/document_loaders/langchain_community.document_loaders.csv_loader.CSVLoader.html#langchain_community.document_loaders.csv_loader.CSVLoader
     loader = CSVLoader(
         file_path=tmp_file_path, 
         encoding="utf-8", 
@@ -49,36 +39,14 @@ def upload(file: any) -> bool:
     # },
     
     docs = loader.load()
-    # embeddings = OpenAIEmbeddings()
 
     logging.debug(f'docs: {docs}')
 
-    add_chunks(
+    Neo4jVector.from_documents(
         docs, 
         EMBEDDINGS, 
-        url, 
-        username, 
-        password)
-
-    add_document_and_chunk_connections(
-        filename=file.name,
-        full_text = "",
-        chunks = [d.page_content for d in docs],
-        url=url,
-        username=username,
-        password = password
-    )
-
-    # Adding tags
-
-    for doc in docs:
-        tags = get_tags(doc.page_content)
-        add_tags_to_chunk(
-            doc.page_content,
-            tags,
-            url,
-            username,
-            password
-        )
+        url=url, 
+        username=username, 
+        password=password)  
     
     return True
