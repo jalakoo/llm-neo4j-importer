@@ -1,10 +1,17 @@
-import streamlit as st
-import streamlit.components.v1 as components
 from upload_utils import upload, type_supported
 import logging
 import os
+import streamlit as st
+import streamlit.components.v1 as components
+import sys
 
 logging.basicConfig(filename='llm_neo4j_importer.log', encoding='utf-8', level=logging.DEBUG)
+
+root = logging.getLogger()
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+root.addHandler(handler)
+
 
 def on_input_change():
     user_input = st.session_state.user_input

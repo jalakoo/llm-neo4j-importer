@@ -9,8 +9,9 @@ import logging
 from neo4j.exceptions import ClientError
 from .llm_manager import EMBEDDINGS
 from .tag_generator import get_tags
-from .entity_relationships_extraction import get_entities
-from .n4j_utils import add_chunks, add_tags_to_chunk, add_document_and_chunk_connections,document_exists
+# from .langchain_entity_relationships import get_entities
+from .openai_entity_relationships_extraction import get_entities
+from .n4j_utils import add_chunks, add_entities_relationships_to_chunk, add_tags_to_chunk, add_document_and_chunk_connections,document_exists
 
 def upload(
         file: any) -> bool:
@@ -48,8 +49,8 @@ def upload(
     
     text_splitter = CharacterTextSplitter(chunk_size=200, chunk_overlap=100)
     docs = [Document(page_content=x) for x in text_splitter.split_text(content.decode())]
-    # embeddings = OpenAIEmbeddings()
-
+    
+    # Add Vector
     add_chunks(
         docs,
         EMBEDDINGS,
@@ -58,6 +59,7 @@ def upload(
         password
     )
 
+    # Add simple (Chunk)-[:CHILD_OF]->(Document) relationship
     add_document_and_chunk_connections(
         file.name,
         content,
@@ -67,17 +69,17 @@ def upload(
         password
     )
 
-    for doc in docs:
-        entities = get_entities(doc.page_content)
-        logging.debug(f'entities: {entities}')
-        # tags = get_tags(doc.page_content)
-        # add_tags_to_chunk(
-        #     doc.page_content,
-        #     tags,
-        #     url,
-        #     username,
-        #     password
-        # )
+    chunks = [d.page_content for d in docs]
+
+    for chunk in chunks:
+        entities = get_entities(chunk)
+        add_entities_relationships_to_chunk(
+            chunk,
+            entities,
+            url,
+            username,
+            password
+        )
 
     return True
 

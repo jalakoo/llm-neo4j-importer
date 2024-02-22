@@ -52,6 +52,7 @@ def upload(file: any) -> bool:
 
     logging.debug(f'docs: {docs}')
 
+    # Vector
     add_chunks(
         docs, 
         EMBEDDINGS, 
@@ -59,6 +60,7 @@ def upload(file: any) -> bool:
         username, 
         password)
 
+    # Document -> Chunk relationships
     add_document_and_chunk_connections(
         filename=file.name,
         full_text = "",
@@ -68,16 +70,20 @@ def upload(file: any) -> bool:
         password = password
     )
 
-    # Adding tags
+    # TODO: Extract entities and relationships from content
 
-    for doc in docs:
-        tags = get_tags(doc.page_content)
-        add_tags_to_chunk(
-            doc.page_content,
-            tags,
-            url,
-            username,
-            password
-        )
+    # TODO: Explicitly search row values for urls
+
+    
+    # Adding tags
+    # for doc in docs:
+    #     tags = get_tags(doc.page_content)
+    #     add_tags_to_chunk(
+    #         doc.page_content,
+    #         tags,
+    #         url,
+    #         username,
+    #         password
+    #     )
     
     return True

@@ -11,28 +11,6 @@ from .llm_manager import LLM
 import logging
 
 def get_entities(text: str) -> list[str]:
-    # chat = ChatOpenAI(temperature=0)
-
-    # messages = [
-    #     SystemMessage(
-    #         content="You are a helpful assistant that extracts entities and relationships from text.",
-    #     ),
-    #     HumanMessage(
-    #         content=f"""
-    #         Given a prompt, extrapolate the most important Relationships.
-
-    #         Each Relationship must connect 2 Entities represented as an item list like ["ENTITY 1", "RELATIONSHIP", "ENTITY 2"]. The Relationship is directed, so the order matters.
-
-    #         Use singular nouns for Entities.
-
-    #         For example; the prompt: `All birds like to eat seeds` should return: ["Bird", "EATS", "Seed"]
-
-    #         Limit the list to a maximum of 12 relationships. Prioritize item lists with Entities in multiple item lists. Remove duplicate entries.
-
-    #         prompt: {text}
-    #         """
-    #     ),
-    # ]
 
     # Using langchain GPT4All example
     template = """
@@ -51,22 +29,6 @@ def get_entities(text: str) -> list[str]:
     prompt = PromptTemplate.from_template(template)
     llm_chain = LLMChain(prompt=prompt, llm=LLM)
     result = llm_chain.invoke(text)
-
-    # final_text = f"""
-    #         Given a prompt, extrapolate the most important Relationships.
-
-    #         Each Relationship must connect 2 Entities represented as an item list like ["ENTITY 1", "RELATIONSHIP", "ENTITY 2"]. The Relationship is directed, so the order matters.
-
-    #         Use singular nouns for Entities.
-
-    #         For example; the prompt: `All birds like to eat seeds` should return: ["Bird", "EATS", "Seed"]
-
-    #         Limit the list to a maximum of 12 relationships. Prioritize item lists with Entities in multiple item lists. Remove duplicate entries.
-
-    #         prompt: {text}
-    #         """
-    
-    # result = LLM.generate(text)
 
     print(f'Entity triples generated: {result}')
     logging.info(f'Entity triples generated: {result}')

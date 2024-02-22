@@ -76,12 +76,103 @@ def add_chunks(
     username: str,
     password: str    
 ):
+    # Target Neo4j DB requires APOC (included in Aura, needs to be enabled on desktop)
     Neo4jVector.from_documents(
         chunks, 
         embeddings, 
         url=url, 
         username=username, 
         password=password)  
+     
+def add_entities_relationships_to_chunk(
+          chunk: str,
+          triples: list[list],
+          url: str,
+          username: str,
+          password: str,
+          database : str = "neo4j"
+):
+
+    # UNWIND will not work because we need to dynamically assign a relationship type. Types and Node labels can not be set within an unwind context or via params!
+
+    # query = """
+    #         MATCH (c:Chunk {text:$text})
+    #         WITH c
+    #         UNWIND $triples AS triple
+    #         MERGE (f:Entity {name:triple[0]})
+    #         MERGE (t:Entity {name:triple[2]})
+    #         MERGE (f)-[:`{triple[1]}`]->(t)
+    #         """
+
+    query = """MATCH (c:Chunk {text:$text})"""
+
+    # NOTE: Double quotes for string property values, back-tick for enclosing node label or relationship type names!
+    for i, triple in enumerate(triples):
+            if len(triple) != 3:
+                 logging.warning(f"Skipping invalid triple: {triple}")
+                 continue
+            query += f"""
+            MERGE (f{i}:Entity {{name:"{triple[0]}"}})
+            MERGE (t{i}:Entity {{name:"{triple[2]}"}})
+            MERGE (f{i})-[:`{triple[1]}`]->(t{i})
+            MERGE (c)-[:MENTIONS]->(f{i})
+            """
+    params = {
+        "text": chunk
+    } 
+    try:
+        graph = Neo4jGraph(
+            url=url,
+            username=username,
+            password=password,
+            database=database
+        )
+        graph.query(
+            query,
+            params
+        )
+    except Exception as e:
+        logging.error(f'Problem adding triple entity-relationships to chuck: {e}')
+
+# As labels instead of node name properties
+# def add_entities_relationships_to_chunk(
+#           chunk: str,
+#           triples: list[list],
+#           url: str,
+#           username: str,
+#           password: str,
+#           database : str = "neo4j"
+# ):
+
+#     # Unwind will not work for generating labels dynamically
+#     query = """
+#             MATCH (c:Chunk {text:$text})
+#             """
+#     for i, triple in enumerate(triples):
+#             if len(triple) != 3:
+#                  logging.warning(f"Skipping invalid triple: {triple}")
+#                  continue
+#             query += f"""
+#             MERGE (f{i}:`{triple[0]}`)
+#             MERGE (t{i}: `{triple[2]}`)
+#             MERGE (f{i})-[:`{triple[1]}`]->(t{i})
+#             """
+#     params = {
+#         "text": chunk
+#     } 
+#     try:
+#         graph = Neo4jGraph(
+#             url=url,
+#             username=username,
+#             password=password,
+#             database=database
+#         )
+#         graph.query(
+#             query,
+#             params
+#         )
+#     except Exception as e:
+#         logging.error(f'Problem adding triple entity-relationships to chuck: {e}')
 
 def add_tags_to_chunk(
           chunk: str,

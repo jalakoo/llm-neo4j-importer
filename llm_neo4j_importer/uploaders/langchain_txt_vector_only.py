@@ -9,7 +9,7 @@ import logging
 from neo4j.exceptions import ClientError
 from .llm_manager import EMBEDDINGS
 from .tag_generator import get_tags
-from .entity_relationships_extraction import get_entities
+from .langchain_entity_relationships import get_entities
 from .n4j_utils import add_chunks, add_tags_to_chunk, add_document_and_chunk_connections,document_exists
 
 def upload(
