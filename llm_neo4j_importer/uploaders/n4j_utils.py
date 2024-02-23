@@ -84,6 +84,8 @@ def add_docs(
 
     # Target Neo4j DB requires APOC (included in Aura, needs to be enabled on desktop)
 
+    # Will create a vector index named 'vector', with property 'embedding' holding the actual embedding data
+
     Neo4jVector.from_documents(
         docs, 
         embeddings, 
@@ -359,6 +361,38 @@ def add_document_and_chunk_connections(
         params = {
             "filename": filename,
             "full_text": full_text,
+            "children": chunks
+        }
+        try:
+            graph.query(
+                query,
+                params
+            )
+        except ClientError:
+            pass
+
+def add_video_and_chunk_connections(
+          filename: str,
+          full_text: str,
+          chunks: list[str],
+          url: str,
+          username: str,
+          password: str,
+    ):
+        graph = Neo4jGraph(
+            url=url,
+            username=username,
+            password=password
+        )
+        query = """
+                MERGE (v:Video {name:$filename})
+                WITH v
+                UNWIND $children AS child
+                MATCH (c:Chunk {text:child})
+                MERGE (c)-[:CHILD_OF]->(v)
+                """
+        params = {
+            "filename": filename,
             "children": chunks
         }
         try:

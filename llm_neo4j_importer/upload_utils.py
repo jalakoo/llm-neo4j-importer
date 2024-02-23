@@ -4,6 +4,7 @@ from uploaders.langchain_csv_vector_plus import upload as load_csv_vector_plus
 from uploaders.langchain_csv_vector_only import upload as load_csv_vector_only
 from uploaders.langchain_csv_graph import upload as load_csv_graph
 from uploaders.langchain_image import upload as load_image
+from uploaders.langchain_youtube import is_youtube_url, upload_url_link
 import requests
 import logging
 
@@ -11,6 +12,11 @@ def type_supported(type:str) -> bool:
     if type in ["application/pdf", "text/csv", "text/plain", "image/jpeg", "image/png"]:
         return True
     return False
+
+def upload_url(url: str)-> str:
+    if is_youtube_url(url):
+        return upload_url_link(url)
+    return "Unsupported link type"
 
 def upload(file:any) -> bool:
 
@@ -21,9 +27,11 @@ def upload(file:any) -> bool:
     if file.type == "application/pdf":
         return load_pdf(file)
     elif file.type == "text/csv":
-        load_csv_graph(file)
-        load_csv_vector_plus(file)
-        return True
+        response = ""
+        # response += load_csv_graph(file)
+        # response += load_csv_vector_plus(file)
+        response += load_csv_vector_only(file)
+        return response
     
     elif file.type == "text/plain":
         return load_txt(file)

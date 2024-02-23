@@ -14,32 +14,38 @@ def upload(file: any) -> bool:
     # Get filename
     filename = file.name
 
-    # Use pandas to quickly read and manipulate csv data
-    df = pd.read_csv(file, keep_default_na=False)
+    try:
+        # Use pandas to quickly read and manipulate csv data
+        df = pd.read_csv(file, keep_default_na=False)
 
-    nodes = []
+        nodes = []
 
-    for index, row in df.iterrows():
-        print("Row Index:", index)
+        for index, row in df.iterrows():
+            print("Row Index:", index)
 
-        row_pairs = []
+            row_pairs = []
 
-        # Iterate over columns
-        for column_name, column_value in row.items():
-            if column_value is None or column_value == '':
-                continue
-            else:
-                print("Column:", column_name, "Value:", column_value)
-                row_pairs.append([column_name, column_value])
+            # Iterate over columns
+            for column_name, column_value in row.items():
+                if column_value is None or column_value == '':
+                    continue
+                else:
+                    print("Column:", column_name, "Value:", column_value)
+                    row_pairs.append([column_name, column_value])
 
-        nodes.append(row_pairs)
+            nodes.append(row_pairs)
 
-    add_nodes_to_doc(
-        filename,
-        nodes,
-        url,
-        username,
-        password,
-    )
+        # Will build connections between doc, rows, and values but doesn't accurately describe inferred relationships
 
-    return True
+        add_nodes_to_doc(
+            filename,
+            nodes,
+            url,
+            username,
+            password,
+        )
+        return f"Successfully uploaded {filename}"
+    
+    except Exception as e:
+        return f"{e}"
+
