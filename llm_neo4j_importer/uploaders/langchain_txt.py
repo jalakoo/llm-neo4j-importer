@@ -2,16 +2,15 @@ from langchain.docstore.document import Document
 # from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.document_loaders import TextLoader
-from langchain_community.graphs import Neo4jGraph
-from langchain_community.vectorstores import Neo4jVector
 import os
 import logging
-from neo4j.exceptions import ClientError
 from .llm_manager import EMBEDDINGS
 from .tag_generator import get_tags
-# from .langchain_entity_relationships import get_entities
 from .openai_entity_relationships_extraction import get_entities
-from .n4j_utils import add_chunks, add_entities_relationships_to_chunk, add_tags_to_chunk, add_document_and_chunk_connections,document_exists
+from .n4j_utils import add_docs, add_entities_relationships_to_chunk, add_tags_to_chunk, add_document_and_chunk_connections,document_exists
+
+neo4j_log = logging.getLogger("neo4j")
+neo4j_log.setLevel(logging.ERROR)
 
 def upload(
         file: any) -> bool:
@@ -51,7 +50,7 @@ def upload(
     docs = [Document(page_content=x) for x in text_splitter.split_text(content.decode())]
     
     # Add Vector
-    add_chunks(
+    add_docs(
         docs,
         EMBEDDINGS,
         url,
@@ -59,20 +58,23 @@ def upload(
         password
     )
 
+    chunks = [d.page_content for d in docs]
+
     # Add simple (Chunk)-[:CHILD_OF]->(Document) relationship
     add_document_and_chunk_connections(
         file.name,
         content,
-        [d.page_content for d in docs],
+        chunks, 
         url,
         username,
         password
     )
 
-    chunks = [d.page_content for d in docs]
-
     for chunk in chunks:
+        # Extract a list of tuples (entity, relationship, entity)
         entities = get_entities(chunk)
+    
+        # Expand around chunks with entity-relationship-entity data
         add_entities_relationships_to_chunk(
             chunk,
             entities,

@@ -4,7 +4,7 @@ from langchain.indexes import VectorstoreIndexCreator
 from langchain.embeddings.openai import OpenAIEmbeddings
 import tempfile
 import logging
-from .n4j_utils import add_chunk, chunk_exists, add_chunks, add_document_and_chunk_connections, add_tags_to_chunk, document_exists, add_document, add_tags_to_document
+from .n4j_utils import add_chunk, chunk_exists, add_docs, add_document_and_chunk_connections, add_tags_to_chunk, document_exists, add_document, add_tags_to_document
 import os
 from .tag_generator import get_tags
 

@@ -5,7 +5,7 @@ from pypdf import PdfReader
 import io
 import logging
 import os
-from .n4j_utils import add_chunks, add_document_and_chunk_connections, add_tags_to_chunk, document_exists
+from .n4j_utils import add_docs, add_document_and_chunk_connections, add_tags_to_chunk, document_exists
 from .tag_generator import get_tags
 
 def upload(file: any) -> bool:

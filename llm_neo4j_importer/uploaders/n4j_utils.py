@@ -6,6 +6,9 @@ from pydantic import BaseModel
 import logging
 import os
 
+neo4j_log = logging.getLogger("neo4j")
+neo4j_log.setLevel(logging.ERROR)
+
 # More info at: https://api.python.langchain.com/en/latest/graphs/langchain.graphs.neo4j_graph.Neo4jGraph.html#
 
 def execute_query(url: str,
@@ -69,16 +72,20 @@ def add_chunk(
             username=username, 
             password=password)
 
-def add_chunks(
-    chunks: list[str],
+def add_docs(
+    docs: list[any], # list[Documents]
     embeddings: any,
     url: str,
     username: str,
     password: str    
 ):
+    
+    # Official API Doc: https://api.python.langchain.com/en/latest/vectorstores/langchain_community.vectorstores.neo4j_vector.Neo4jVector.html#langchain_community.vectorstores.neo4j_vector.Neo4jVector
+
     # Target Neo4j DB requires APOC (included in Aura, needs to be enabled on desktop)
+
     Neo4jVector.from_documents(
-        chunks, 
+        docs, 
         embeddings, 
         url=url, 
         username=username, 
@@ -93,6 +100,10 @@ def add_entities_relationships_to_chunk(
           database : str = "neo4j"
 ):
 
+    if len(triples) == 0:
+         logging.info(f'Skipping chunk with no triples: {chunk}, triples: {triples}')
+         return
+    
     # UNWIND will not work because we need to dynamically assign a relationship type. Types and Node labels can not be set within an unwind context or via params!
 
     # query = """
@@ -120,6 +131,9 @@ def add_entities_relationships_to_chunk(
     params = {
         "text": chunk
     } 
+    
+    logging.debug(f'Final query:\n{query}')
+
     try:
         graph = Neo4jGraph(
             url=url,
@@ -174,6 +188,47 @@ def add_entities_relationships_to_chunk(
 #     except Exception as e:
 #         logging.error(f'Problem adding triple entity-relationships to chuck: {e}')
 
+def add_nodes_to_doc(
+          filename: str,
+          nodes: list[list[(str, str)]],
+          url: str,
+          username: str,
+          password: str,
+          database: str = "neo4j"):
+        
+        graph = Neo4jGraph(
+            url=url,
+            username=username,
+            password=password,
+            database=database
+        )
+
+        query = """MERGE (d:Document {name:$filename})"""
+
+        # NOTE: Double quotes for string property values, back-tick for enclosing node label or relationship type names!
+        for i, row in enumerate(nodes):
+            query += f"""MERGE (r{i}:Row {{name:"{filename}_{i}"}})"""
+            for rpi, tuple in enumerate(row):
+                if len(tuple) != 2:
+                    logging.warning(f"Skipping invalid node: {tuple}")
+                    continue
+                query += f"""
+                MERGE (n{i}_{rpi}:`{tuple[0]}` {{name:"{tuple[1]}"}})
+                MERGE (n{i}_{rpi})-[:FROM]->(r{i})
+                """
+            # Connect each row to the document
+            query += f"""MERGE (r{i})-[:IN]-(d)"""
+        params = {
+            "filename": filename
+        } 
+        try:
+            graph.query(
+                query,
+                params
+            )
+        except ClientError:
+            pass
+
 def add_tags_to_chunk(
           chunk: str,
           tags: list[str],
@@ -181,6 +236,7 @@ def add_tags_to_chunk(
           username: str,
           password: str,
           database: str = "neo4j"):
+        
         graph = Neo4jGraph(
             url=url,
             username=username,

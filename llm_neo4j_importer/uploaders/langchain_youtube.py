@@ -1,6 +1,6 @@
 from langchain_community.document_loaders import YoutubeLoader
 from .llm_manager import EMBEDDINGS
-from .n4j_utils import add_chunk, chunk_exists, add_chunks, add_document_and_chunk_connections, add_tags_to_chunk, document_exists
+from .n4j_utils import add_chunk, chunk_exists, add_docs, add_document_and_chunk_connections, add_tags_to_chunk, document_exists
 import os
 
 def is_youtube_url(url: str) -> bool:
@@ -25,7 +25,7 @@ def upload_url(url: str):
 
     docs = loader.load()
 
-    add_chunks(
+    add_docs(
         docs, 
         EMBEDDINGS, 
         url, 

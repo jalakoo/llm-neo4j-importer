@@ -2,9 +2,42 @@ from openai import OpenAI
 import json
 import logging
 
+client = OpenAI()
+
+def get_row_type(text: str) -> str:
+    template = """
+    Given a Key:Value pair, determine what Type of data the Value is.
+
+    Choose only from the following options: "person", "date", "url_link", "category" or "text". 
+    
+    For example; `audience:Beginners` should return ["category"]
+
+    Key:Value = """
+    input = template + text
+
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo-1106",
+        # model="gpt-4",
+        response_format={"type":"json_object"},
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant designed to output JSON"},
+            {"role": "user", "content": input}
+            ]
+    )
+
+    try:
+        result_string = completion.choices[0].message.content
+        json_object = json.loads(result_string)
+        print(f'JSON parsed: {json_object}. type: {type(json_object)}')
+        cleaned = json_object["type"]
+    except Exception as e:
+        logging.error(f"Error processing entity extraction from completion:{completion}")
+        cleaned = []
+
+    return cleaned
+
 def get_entities(text: str) -> list[str]:
 
-    # Using langchain GPT4All example
     template = """
     Given a prompt, extrapolate the most important Relationships. 
 
@@ -19,8 +52,6 @@ def get_entities(text: str) -> list[str]:
     prompt:
             """
     input = template + text
-
-    client = OpenAI()
 
     # Official chat completion doc: https://platform.openai.com/docs/api-reference/chat/create
 
